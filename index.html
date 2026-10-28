@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusNav | Campus Wayfinding Prototype</title>
+<style>
+:root{--navy:#20334b;--blue:#dceafa;--blue2:#3977b8;--green:#dcefd9;--yellow:#fff0c2;--red:#f8dddd;--purple:#e9e1f7;--ink:#243449;--muted:#66758a;--white:#fff;--line:#d8e0e9}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink);background:#f5f8fc}
+header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.nav{max-width:1160px;margin:auto;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:21px;color:var(--navy)}.logo{height:38px;width:38px;border-radius:12px;background:var(--blue);display:grid;place-items:center;font-size:22px}
+.nav small{color:var(--muted);font-weight:500}.navlinks{display:flex;gap:18px;align-items:center;font-size:14px}.navlinks a{color:var(--ink);text-decoration:none}
+main{max-width:1160px;margin:0 auto;padding:28px 22px 50px}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;align-items:stretch}
+.hero-copy{padding:28px 4px}.eyebrow{display:inline-block;background:var(--green);border:1px solid #c3dfbf;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:800;letter-spacing:.04em}
+h1{font-size:clamp(34px,4vw,52px);line-height:1.08;margin:18px 0 14px;color:var(--navy);letter-spacing:-1.5px}.hero-copy p{font-size:17px;line-height:1.65;color:var(--muted);max-width:600px}
+.hero-card{background:var(--blue);border:1px solid #c6d9ed;border-radius:24px;padding:22px;min-height:290px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+.hero-card h3{margin:0 0 8px;color:var(--navy)}.hero-card p{margin:0;color:#526a83;line-height:1.5}
+.mini-map{position:relative;height:145px;margin-top:20px;border-radius:16px;background:#f9fbff;border:1px solid #c7d9eb;overflow:hidden}
+.road{position:absolute;background:#dce4ed;border:1px solid #c4d0dd;border-radius:20px}.road.one{height:24px;width:120%;left:-10%;top:60px;transform:rotate(-18deg)}.road.two{height:22px;width:100%;left:12%;top:57px;transform:rotate(40deg)}.road.three{height:18px;width:90%;left:8%;top:100px;transform:rotate(-5deg)}
+.pin{position:absolute;background:#fff;border:2px solid var(--blue2);color:var(--navy);border-radius:12px;padding:6px 9px;font-size:11px;font-weight:800;box-shadow:0 3px 8px #20334b18}.pin.a{top:18px;left:18px}.pin.b{right:18px;bottom:18px;background:var(--green);border-color:#76a66d}.pin.c{right:34%;top:20px;background:var(--yellow);border-color:#d4ae4c}
+.search-panel{background:#fff;border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:0 10px 30px #20334b0a;margin-top:26px}
+.section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px}.section-head h2{margin:0;color:var(--navy);font-size:24px}.section-head p{margin:6px 0 0;color:var(--muted);font-size:14px}
+.badge{background:var(--yellow);border:1px solid #eedb98;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:800;white-space:nowrap}
+.form-grid{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end}
+label{display:block;font-size:12px;font-weight:800;color:#4b5c70;margin:0 0 7px}
+input,select{width:100%;padding:13px 12px;border:1px solid #cbd5e1;border-radius:11px;background:white;color:var(--ink);font:inherit;outline:none}
+input:focus,select:focus{border-color:var(--blue2);box-shadow:0 0 0 3px #3977b81c}
+button{border:0;border-radius:11px;padding:14px 18px;font:inherit;font-weight:800;cursor:pointer;transition:.15s}
+.primary{background:var(--navy);color:white}.primary:hover{background:#314e70}.secondary{background:var(--blue);color:var(--navy);border:1px solid #c6d9ed}
+.quick{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}.quick span{font-size:12px;color:var(--muted);margin-right:4px}.chip{padding:8px 11px;background:#f4f7fb;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--ink)}
+.results{display:none;margin-top:20px;border:1px solid var(--line);border-radius:18px;overflow:hidden}.result-top{padding:18px;background:var(--green);display:flex;justify-content:space-between;gap:12px;align-items:center}.result-top h3{margin:0 0 5px}.result-top p{margin:0;color:#536a52;font-size:13px}.route-body{padding:18px;display:grid;grid-template-columns:1fr .8fr;gap:20px}.route-steps{list-style:none;padding:0;margin:0}.route-steps li{display:flex;gap:12px;padding:0 0 17px;position:relative}.route-steps li:not(:last-child):after{content:"";position:absolute;left:16px;top:35px;bottom:0;width:2px;background:#d5e0ec}.num{height:34px;min-width:34px;border-radius:50%;display:grid;place-items:center;background:var(--blue);border:1px solid #bfd4e9;font-weight:800;color:var(--navy);z-index:1}.route-steps strong{display:block;margin:1px 0 4px}.route-steps p{margin:0;font-size:13px;line-height:1.5;color:var(--muted)}
+.map-box{background:#f6f9fc;border:1px solid var(--line);border-radius:14px;min-height:230px;padding:14px;position:relative;overflow:hidden}.map-box h4{margin:0;font-size:13px}.map-sketch{position:absolute;inset:48px 12px 12px;background:#fff;border:1px solid #e1e8f0;border-radius:12px;overflow:hidden}.map-road{position:absolute;height:19px;background:#e0e7ef;border:1px solid #ccd6e1;border-radius:30px}.map-road.r1{width:120%;left:-8%;top:46%;transform:rotate(-22deg)}.map-road.r2{width:90%;left:20%;top:48%;transform:rotate(48deg)}.map-road.r3{width:110%;left:-5%;top:72%;transform:rotate(2deg)}.map-label{position:absolute;padding:6px 8px;border-radius:8px;font-size:10px;font-weight:800;background:var(--yellow);border:1px solid #e5ce83}.map-label.l1{left:9px;top:12px}.map-label.l2{right:8px;bottom:15px;background:var(--green);border-color:#bdd7b7}.map-label.l3{right:10px;top:14px;background:var(--red);border-color:#e9bcbc}
+.notice{margin-top:16px;padding:12px 14px;background:#fff8e5;border:1px solid #f0dfa8;border-radius:12px;font-size:12px;line-height:1.5;color:#68552b}
+.campus-map-panel{margin-top:24px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 10px 30px #20334b0a}.campus-map-frame{width:100%;height:600px;border:1px solid var(--line);border-radius:14px;background:#f7f9fc}.map-actions{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}.map-note{padding:12px 14px;background:var(--yellow);border:1px solid #eedb98;border-radius:12px;font-size:12px;line-height:1.55;color:#68552b}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px}.feature{background:white;border:1px solid var(--line);border-radius:16px;padding:18px}.feature .ico{height:38px;width:38px;border-radius:12px;display:grid;place-items:center;font-size:19px;margin-bottom:12px}.feature:nth-child(1) .ico{background:var(--red)}.feature:nth-child(2) .ico{background:var(--green)}.feature:nth-child(3) .ico{background:var(--purple)}.feature h3{font-size:15px;margin:0 0 7px}.feature p{font-size:13px;line-height:1.55;color:var(--muted);margin:0}
+footer{border-top:1px solid var(--line);background:#fff;padding:22px;text-align:center;font-size:12px;color:var(--muted)}
+.toast{display:none;margin-top:12px;padding:12px;background:var(--red);border:1px solid #efc6c6;border-radius:10px;color:#7e3535;font-size:13px}
+@media(max-width:850px){.hero{grid-template-columns:1fr}.hero-card{min-height:250px}.form-grid{grid-template-columns:1fr 1fr}.form-grid button{width:100%}.route-body{grid-template-columns:1fr}.features{grid-template-columns:1fr}.navlinks{display:none}}
+@media(max-width:520px){main{padding:18px 14px 36px}.nav{padding:13px 14px}.hero-copy{padding:16px 2px}.search-panel{padding:17px}.form-grid{grid-template-columns:1fr}.section-head{display:block}.badge{display:inline-block;margin-top:12px}.result-top{align-items:flex-start;flex-direction:column}}
+
+.leaflet-map{width:100%;height:600px;border:1px solid var(--line);border-radius:14px;background:#eaf0f6;overflow:hidden}
+#googleSetup code{background:#fff;border:1px solid #eadba6;border-radius:5px;padding:2px 4px}
+@media(max-width:650px){.leaflet-map{height:430px}}
+
+
+#campusLeafletMap{width:100%;height:560px;border:1px solid var(--line,#d7dce5);border-radius:14px;background:#eaf0f6;overflow:hidden;z-index:1}
+#campusLeafletMap .leaflet-popup-content-wrapper{border-radius:10px}
+#campusLeafletMap .leaflet-control-attribution{font-size:10px}
+@media(max-width:650px){#campusLeafletMap{height:430px}}
+
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="brand"><div class="logo">🧭</div><div>CampusNav<br><small>Find your way with confidence</small></div></div>
+    <nav class="navlinks"><a href="#find">Find a destination</a><a href="#campus-map">Campus map</a><a href="#features">Features</a><a href="#about">About</a></nav>
+  </div>
+</header>
+<main>
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow">CAMPUS WAYFINDING · FRONTEND DEMO</span>
+      <h1>Every block.<br>One clear route.</h1>
+      <p>Find your destination with simple directions, familiar landmarks, and a route that starts at your gate.</p>
+      <a href="#find"><button class="primary">Find a block&nbsp; →</button></a>
+    </div>
+    <div class="hero-card">
+      <div><h3>Your campus, made easier.</h3><p>Search a block, choose your starting gate, and follow the steps.</p></div>
+      <div class="mini-map">
+        <div class="road one"></div><div class="road two"></div><div class="road three"></div>
+        <div class="pin a">🚪 Main Gate</div><div class="pin c">📍 Main Junction</div><div class="pin b">🏢 Block 34</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="search-panel" id="find">
+    <div class="section-head"><div><h2>Where do you need to go?</h2><p>Choose a gate and destination to preview a route.</p></div><span class="badge">DEMO ROUTES</span></div>
+    <form id="routeForm">
+      <div class="form-grid">
+        <div><label for="gate">Starting gate</label><select id="gate" required><option value="Main Gate">Main Gate</option><option value="North Gate">North Gate</option><option value="South Gate">South Gate</option></select></div>
+        <div><label for="destination">Destination</label><select id="destination" required><option value="Block 34">Block 34</option><option value="Library">Library</option><option value="Admissions Office">Admissions Office</option><option value="Examination Centre">Examination Centre</option><option value="Student Services">Student Services</option></select></div>
+        <div><label for="search">Or search by name</label><input id="search" type="text" placeholder="e.g. Library or Block 34"></div>
+        <button class="primary" type="submit">Show route</button>
+      </div>
+    </form>
+    <div class="quick"><span>Popular destinations:</span><button type="button" class="chip" data-dest="Block 34">Block 34</button><button type="button" class="chip" data-dest="Library">Library</button><button type="button" class="chip" data-dest="Admissions Office">Admissions Office</button><button type="button" class="chip" data-dest="Examination Centre">Examination Centre</button></div>
+    <div id="toast" class="toast" role="alert"></div>
+    <div class="results" id="results" aria-live="polite">
+      <div class="result-top"><div><h3 id="routeTitle">Route to Block 34</h3><p id="routeSummary">Starting at Main Gate · Demo directions</p></div><button type="button" class="secondary" id="reset">Clear route</button></div>
+      <div class="route-body">
+        <div><h4 style="margin-top:0">Follow these steps</h4><ol class="route-steps" id="steps"></ol></div>
+        <div class="map-box"><h4>Route preview</h4><div class="map-sketch"><div class="map-road r1"></div><div class="map-road r2"></div><div class="map-road r3"></div><span class="map-label l1" id="mapStart">START · MAIN GATE</span><span class="map-label l3">JUNCTION</span><span class="map-label l2" id="mapEnd">BLOCK 34</span></div></div>
+      </div>
+    </div>
+    <div class="notice"><strong>Prototype notice:</strong> This is a frontend-only mock-up. Destination names, route steps, and the map illustration are sample content—not official campus directions. No backend, live map, GPS, or database is connected.</div>
+  </section>
+
+  <section class="campus-map-panel" id="campus-map">
+    <div class="section-head">
+      <div><h2>Campus Map Demo</h2><p>Try the sample markers and example route. This is a demonstration, not official LPU navigation.</p></div>
+      <span class="badge">DEMO MODE</span>
+    </div>
+    <div class="map-actions" style="display:flex;gap:10px;flex-wrap:wrap;margin:14px 0">
+      <button class="primary" type="button" id="zoomCampus">Show demo area</button>
+      <button class="secondary" type="button" id="showDemoRoute">Show example route</button>
+      <button class="secondary" type="button" id="resetCampusMap">Reset demo</button>
+    </div>
+    <div id="campusLeafletMap" class="leaflet-map" role="region" aria-label="Interactive map near Lovely Professional University"></div>
+    <div class="map-note" style="margin-top:14px"><strong>How to use:</strong> zoom with +/−, drag to pan, click sample markers, and select “Show example route” to see a demonstration path.</div>
+    <div class="map-note" style="margin-top:8px"><strong>Demo note:</strong> Marker positions and the example route are illustrative sample data, not verified LPU building locations or walking directions. The OpenStreetMap background needs an internet connection.</div>
+  </section>
+
+  <section class="features" id="features">
+    <article class="feature"><div class="ico">🔎</div><h3>Search destinations</h3><p>Look up blocks and common places with a simple destination selector.</p></article>
+    <article class="feature"><div class="ico">🪧</div><h3>Step-by-step guidance</h3><p>See clear route instructions and landmarks in an easy-to-follow list.</p></article>
+    <article class="feature"><div class="ico">📱</div><h3>Mobile-friendly design</h3><p>Use the prototype on a laptop, tablet, or phone screen.</p></article>
+  </section>
+  <section id="about" style="margin-top:25px;padding:20px;border:1px solid var(--line);background:#fff;border-radius:16px">
+    <h2 style="margin:0 0 8px;color:var(--navy);font-size:20px">About this project</h2>
+    <p style="margin:0;color:var(--muted);font-size:14px;line-height:1.6">CampusNav is a concept for helping first-time visitors find campus destinations with confidence. The next step would be to verify actual campus routes and test the interface with students and visitors.</p>
+  </section>
+</main>
+<footer>CampusNav · Student wayfinding prototype · Reference map and sample routes only</footer>
+<script>
+const routes = {
+  "Block 34": [
+    ["Start at your selected gate","Look for the campus information sign and confirm your starting point."],
+    ["Head towards the main junction","Follow the directional arrows shown in this demo."],
+    ["Check the block signs","Look for the sign labelled Block 34 at the next route point."],
+    ["Confirm your destination","Check the building label before entering."]
+  ],
+  "Library": [
+    ["Start at your selected gate","Follow the main pedestrian route towards the central campus area."],
+    ["Look for the central information point","Use the campus sign to confirm the next direction."],
+    ["Follow the Library sign","Continue to the destination marker and confirm the building label."]
+  ],
+  "Admissions Office": [
+    ["Start at your selected gate","Follow the visitor direction signs towards campus services."],
+    ["Find the student-services junction","Check the information board for the admissions direction."],
+    ["Confirm the office entrance","Look for the Admissions Office label before entering."]
+  ],
+  "Examination Centre": [
+    ["Start at your selected gate","Check event-day or examination signs at the entry point."],
+    ["Follow the examination direction","Use the next campus information board to confirm the route."],
+    ["Confirm the examination centre","Check the venue name and any room or hall information provided."]
+  ],
+  "Student Services": [
+    ["Start at your selected gate","Follow the signs towards student support and service facilities."],
+    ["Check the campus information point","Confirm the correct building or service area."],
+    ["Look for Student Services","Verify the label at the entrance."]
+  ]
+};
+const form = document.getElementById("routeForm");
+const destination = document.getElementById("destination");
+const search = document.getElementById("search");
+const gate = document.getElementById("gate");
+const results = document.getElementById("results");
+const toast = document.getElementById("toast");
+function showRoute(dest){
+  const start = gate.value;
+  document.getElementById("routeTitle").textContent = "Route to " + dest;
+  document.getElementById("routeSummary").textContent = "Starting at " + start + " · Sample directions";
+  document.getElementById("mapStart").textContent = "START · " + start.toUpperCase();
+  document.getElementById("mapEnd").textContent = dest.toUpperCase();
+  const list = document.getElementById("steps"); list.innerHTML = "";
+  (routes[dest] || routes["Block 34"]).forEach((step,i)=>{
+    const li=document.createElement("li");
+    li.innerHTML = `<span class="num">${i+1}</span><div><strong>${step[0]}</strong><p>${step[1]}</p></div>`;
+    list.appendChild(li);
+  });
+  toast.style.display="none"; results.style.display="block";
+  results.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+form.addEventListener("submit",e=>{
+  e.preventDefault();
+  const typed=search.value.trim().toLowerCase();
+  let dest=destination.value;
+  if(typed){
+    const all=Object.keys(routes);
+    const match=all.find(x=>x.toLowerCase()===typed) || all.find(x=>x.toLowerCase().includes(typed) || typed.includes(x.toLowerCase()));
+    if(!match){toast.textContent="This demo only includes sample destinations. Try Block 34, Library, Admissions Office, Examination Centre, or Student Services.";toast.style.display="block";results.style.display="none";return;}
+    dest=match; destination.value=match;
+  }
+  showRoute(dest);
+});
+document.querySelectorAll("[data-dest]").forEach(btn=>btn.addEventListener("click",()=>{
+  destination.value=btn.dataset.dest;search.value="";showRoute(btn.dataset.dest);
+}));
+document.getElementById("reset").addEventListener("click",()=>{results.style.display="none";search.value="";});
+
+const OSM_URL = "https://www.openstreetmap.org/?mlat=31.256&mlon=75.704#map=16/31.256/75.704";
+document.getElementById("openOsm")?.addEventListener("click",()=>window.open(OSM_URL,"_blank","noopener"));
+document.getElementById("resetMap")?.addEventListener("click",()=>{
+  const frame=document.querySelector("#mapFallback iframe");
+  if(frame) frame.src="https://www.openstreetmap.org/export/embed.html?bbox=75.690%2C31.246%2C75.719%2C31.266&layer=mapnik&marker=31.256%2C75.704";
+  document.getElementById("mapFallback").style.display="block";
+  document.getElementById("googleMapWrap").style.display="none";
+  document.getElementById("googleSetup").style.display="none";
+});
+document.getElementById("showGoogle")?.addEventListener("click",()=>{
+  document.getElementById("googleSetup").style.display="block";
+  const key = "YOUR_GOOGLE_MAPS_API_KEY";
+  if (key === "YOUR_GOOGLE_MAPS_API_KEY") {
+    document.getElementById("googleSetup").scrollIntoView({behavior:"smooth",block:"nearest"});
+    return;
+  }
+  loadGoogleMap(key);
+});
+function loadGoogleMap(key){
+  document.getElementById("mapFallback").style.display="none";
+  document.getElementById("googleMapWrap").style.display="block";
+  if(window.google && window.google.maps){ renderGoogleMap(); return; }
+  const script=document.createElement("script");
+  script.src="https://maps.googleapis.com/maps/api/js?key="+encodeURIComponent(key)+"&callback=renderGoogleMap&v=weekly";
+  script.async=true; script.defer=true;
+  script.onerror=()=>{document.getElementById("googleSetup").style.display="block";};
+  document.head.appendChild(script);
+}
+window.renderGoogleMap=function(){
+  const center={lat:31.256,lng:75.704};
+  const map=new google.maps.Map(document.getElementById("googleMap"),{
+    center,zoom:16,mapTypeId:"hybrid",tilt:45,heading:0,
+    mapTypeControl:true,streetViewControl:true,fullscreenControl:true
+  });
+  new google.maps.Marker({position:center,map,title:"LPU campus area (approximate)"});
+};
+
+</script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function(){
+  // Approximate campus-area center; sample marker positions below are for demo UI only.
+  const center = [31.256, 75.704];
+  const mapEl = document.getElementById("campusLeafletMap");
+  if (!mapEl || !window.L) return;
+  const map = L.map(mapEl, { scrollWheelZoom: true }).setView(center, 16);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>'
+  }).addTo(map);
+
+  const demoPlaces = [
+    {name:"Starting Gate (Demo)", coords:[31.2549,75.7017], note:"Sample starting point"},
+    {name:"Block 34 (Demo)", coords:[31.2570,75.7062], note:"Sample destination — position is illustrative"},
+    {name:"Library (Demo)", coords:[31.2580,75.7034], note:"Sample destination — position is illustrative"}
+  ];
+  const markers = demoPlaces.map(place => L.marker(place.coords).addTo(map)
+    .bindPopup("<strong>"+place.name+"</strong><br>"+place.note));
+  const demoRoute = L.polyline([demoPlaces[0].coords, [31.2556,75.7030], [31.2564,75.7045], demoPlaces[1].coords], {
+    color:"#2563eb", weight:5, opacity:0.85, dashArray:"8 8"
+  });
+  markers[0].openPopup();
+
+  document.getElementById("zoomCampus")?.addEventListener("click", ()=>map.fitBounds(L.featureGroup(markers).getBounds().pad(0.25), {animate:true}));
+  document.getElementById("showDemoRoute")?.addEventListener("click", ()=>{
+    demoRoute.addTo(map);
+    map.fitBounds(demoRoute.getBounds().pad(0.3), {animate:true});
+  });
+  document.getElementById("resetCampusMap")?.addEventListener("click", ()=>{
+    map.removeLayer(demoRoute);
+    map.setView(center, 16, {animate:true});
+    markers[0].openPopup();
+  });
+  setTimeout(()=>map.invalidateSize(), 250);
+})();
+</script>
+
+</body>
+</html>
