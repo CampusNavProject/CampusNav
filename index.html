@@ -312,7 +312,7 @@ window.renderGoogleMap=function(){
   const map = L.map(mapEl).setView([31.256,75.704], 16);
   const streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
   const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles &copy; Esri'});
-  let startMarker=null, destinationMarker=null, routeLayer=null, choosingStart=false, currentPosition=null, watchingLocation=false, watchId=null;
+  let startMarker=null, destinationMarker=null, routeLayer=null, choosingStart=false, choosingDestination=false, selectedBlock=null, currentPosition=null, watchingLocation=false, watchId=null;
   const setStatus = msg => statusEl.textContent=msg;
   // Number labels copied from the user's supplied screenshots; no GPS coordinates inferred.
   const visibleBlocks = ["1","2A","2B","3","4","6","8B","8C","9","10","11","12","13","14","15A","15B","18","19","20","21A","21B","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","41A","41B","41C","41D","42","45","47","48","49","50","51A","51B","53","54","55","55A","56"];
@@ -321,8 +321,11 @@ window.renderGoogleMap=function(){
     const btn = document.createElement("button");
     btn.type = "button"; btn.className = "chip"; btn.textContent = "Block " + block;
     btn.addEventListener("click", () => {
+      selectedBlock = block;
       input.value = "Block " + block;
-      setStatus("Block " + block + " selected. Its exact map pin is not calibrated yet; use the supplied block map as a reference until positions are verified.");
+      choosingDestination = true;
+      setStatus("Block " + block + " selected. Tap that building's position on the map to set the destination.");
+      map.getContainer().scrollIntoView({behavior:"smooth",block:"center"});
       blockDirectory.querySelectorAll("button").forEach(b => b.style.outline = "");
       btn.style.outline = "2px solid #3977b8";
     });
@@ -357,12 +360,27 @@ window.renderGoogleMap=function(){
   document.getElementById('chooseStart').addEventListener('click',()=>{
     choosingStart=true;setStatus('Tap anywhere on the map to set your starting point.');
   });
-  map.on('click',e=>{if(choosingStart){setStart(e.latlng,'Chosen starting point');choosingStart=false;}});
+  map.on('click',e=>{
+    if(choosingStart){setStart(e.latlng,'Chosen starting point');choosingStart=false;return;}
+    if(choosingDestination && selectedBlock){
+      choosingDestination=false;
+      const point={lat:e.latlng.lat,lon:e.latlng.lng,display_name:'Block '+selectedBlock+' (map point selected)'};
+      input.value='Block '+selectedBlock;
+      routeTo(point);
+    }
+  });
   document.getElementById('satelliteView').addEventListener('click',()=>{if(map.hasLayer(streets))map.removeLayer(streets);if(!map.hasLayer(satellite))satellite.addTo(map);});
   document.getElementById('streetView').addEventListener('click',()=>{if(map.hasLayer(satellite))map.removeLayer(satellite);if(!map.hasLayer(streets))streets.addTo(map);});
   document.getElementById('clearLiveRoute').addEventListener('click',()=>{clearRoute();setStatus('Route cleared. Your starting point is retained.');});
   async function searchDestination(){
     const q=input.value.trim(); if(!q){setStatus('Enter a destination to search.');return;}
+    const blockMatch=q.match(/^block\s*(\d+[a-z]?)$/i);
+    if(blockMatch){
+      selectedBlock=blockMatch[1].toUpperCase();
+      choosingDestination=true;
+      setStatus('Block '+selectedBlock+' found. Tap its building on the map to set its exact destination point.');
+      return;
+    }
     setStatus('Searching OpenStreetMap for “'+q+'”…'); resultsEl.innerHTML='';
     try{
       const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&bounded=1&viewbox=75.66,31.28,75.75,31.23&q='+encodeURIComponent(q+' LPU Phagwara');
