@@ -56,7 +56,7 @@ footer{border-top:1px solid var(--line);background:#fff;padding:22px;text-align:
 <header>
   <div class="nav">
     <div class="brand"><div class="logo">🧭</div><div>CampusNav<br><small>Find your way with confidence</small></div></div>
-    <nav class="navlinks"><a href="#live-navigation">Find a destination</a><a href="#features">Features</a><a href="#about">About</a></nav>
+    <nav class="navlinks"><a href="#live-navigation">Find a destination</a><a href="#campus-reference">Campus map</a><a href="#features">Features</a><a href="#about">About</a></nav>
   </div>
 </header>
 <main>
@@ -89,6 +89,24 @@ footer{border-top:1px solid var(--line);background:#fff;padding:22px;text-align:
       <p style="font-size:11px;line-height:1.5;color:var(--muted);margin:12px 0 0">These are reference labels only. Their GPS pin positions still need to be aligned with the real campus map, so the directory does not pretend that unverified pins or routes are accurate.</p>
     </div>
     <div class="map-note" style="margin-top:12px"><strong>Accuracy note:</strong> GPS can be less accurate indoors. Walking routes can only follow paths mapped in OpenStreetMap; unmapped campus paths or buildings may not appear. Confirm directions locally if the map data looks incomplete.</div>
+  </section>
+
+  <section class="campus-map-panel" id="campus-reference">
+    <div class="section-head">
+      <div>
+        <h2>LPU Campus Reference Map</h2>
+        <p>Use the numbered map to identify buildings and nearby landmarks. Zoom in for details.</p>
+      </div>
+      <span class="badge">STUDENT REFERENCE</span>
+    </div>
+    <img
+      src="LPU_Campus_Reference_Map_No_Labels.jpg"
+      alt="LPU campus reference map with numbered blocks, roads, landmarks and parking areas"
+      style="display:block;width:100%;height:auto;max-height:900px;object-fit:contain;border:1px solid var(--line);border-radius:14px;background:#fff;cursor:zoom-in"
+      onclick="window.open(this.src,'_blank','noopener')"
+      loading="lazy"
+    >
+    <p style="margin:10px 0 0;color:var(--muted);font-size:12px;line-height:1.5">Reference map only. Confirm the exact building and route on campus; the numbered areas are not GPS-calibrated navigation pins.</p>
   </section>
 
   <section class="features" id="features">
