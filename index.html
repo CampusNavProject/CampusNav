@@ -291,14 +291,22 @@ body[data-theme="dark"] footer{border-color:var(--line)}
     const query=input.value.trim();
     suggestionBox.innerHTML='';
     if(!query){closeSuggestions();return;}
-    const blockQuery=query.match(/^(?:block\s*)?(\d+[a-z]?)$/i);
+    const normalized=query.toLowerCase().replace(/^block\s*/,'').trim();
+    if(/^b(?:l(?:o(?:c(?:k)?)?)?)?$/.test(normalized)){
+      visibleBlocks.slice(0,8).forEach(block=>addSuggestion('Block '+block,'Numbered campus building',()=>{
+        selectedBlock=block;choosingDestination=true;
+        setStatus('Block '+block+' selected. Use the reference map to confirm the building, then tap its position on the live map.');
+        map.getContainer().scrollIntoView({behavior:'smooth',block:'center'});
+      }));
+      suggestionBox.hidden=false;input.setAttribute('aria-expanded','true');return;
+    }
+    const blockQuery=normalized.match(/^(\d+[a-z]?)$/i);
     if(blockQuery){
       const wanted=blockQuery[1].toUpperCase();
       const matches=visibleBlocks.filter(b=>b.toUpperCase().startsWith(wanted));
       matches.slice(0,8).forEach(block=>{
         addSuggestion('Block '+block,'Numbered campus building',()=>{
-          selectedBlock=block;
-          choosingDestination=true;
+          selectedBlock=block;choosingDestination=true;
           setStatus('Block '+block+' selected. Use the reference map to confirm the building, then tap its position on the live map.');
           map.getContainer().scrollIntoView({behavior:'smooth',block:'center'});
         });
@@ -306,7 +314,7 @@ body[data-theme="dark"] footer{border-color:var(--line)}
       if(matches.length){suggestionBox.hidden=false;input.setAttribute('aria-expanded','true');}
       return;
     }
-    if(query.length<3){closeSuggestions();return;}
+    if(query.length<2){closeSuggestions();return;}
     suggestionTimer=setTimeout(async()=>{
       try{
         suggestionRequest=new AbortController();
@@ -336,7 +344,8 @@ body[data-theme="dark"] footer{border-color:var(--line)}
   document.addEventListener('click',event=>{
     if(!event.target.closest('.destination-autocomplete')) closeSuggestions();
   });
-\n    const markerIcon = color => L.divIcon({className:'',html:'<div style="width:18px;height:18px;border:3px solid white;border-radius:50%;background:'+color+';box-shadow:0 1px 6px #333"></div>',iconSize:[18,18],iconAnchor:[9,9]});
+
+  const markerIcon = color => L.divIcon({className:'',html:'<div style="width:18px;height:18px;border:3px solid white;border-radius:50%;background:'+color+';box-shadow:0 1px 6px #333"></div>',iconSize:[18,18],iconAnchor:[9,9]});
   function setStart(latlng,label){
     if(startMarker) map.removeLayer(startMarker);
     startMarker=L.marker(latlng,{draggable:true,icon:markerIcon('#16834a')}).addTo(map).bindPopup(label||'Starting point');
