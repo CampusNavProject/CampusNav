@@ -103,7 +103,7 @@ body[data-theme="dark"] footer{border-color:var(--line)}
 <header>
   <div class="nav">
     <div class="brand"><div class="logo">🧭</div><div>CampusNav<br><small>Find your way with confidence</small></div></div>
-    <nav class="navlinks"><a href="#live-navigation">Find a destination</a><a href="#how-to-use">How to use</a><a href="#campus-reference">Campus map</a><a href="#features">Features</a><a href="#about">About</a><button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark mode" title="Switch to dark mode">☾</button></nav>
+    <nav class="navlinks"><a href="#live-navigation">Find a destination</a><a href="#how-to-use">How to use</a><a href="#campus-reference">Campus map</a><a href="#features">Features</a><a href="#about">About</a><button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark mode" title="Switch to dark mode">🌙</button></nav>
   </div>
 </header>
 <main>
@@ -206,7 +206,7 @@ body[data-theme="dark"] footer{border-color:var(--line)}
   function applyTheme(theme){
     document.body.setAttribute('data-theme',theme);
     const dark=theme==='dark';
-    button.textContent=dark?'☀':'☾';
+    button.textContent=dark?'☀️':'🌙';
     button.setAttribute('aria-label',dark?'Switch to light mode':'Switch to dark mode');
     button.title=dark?'Switch to light mode':'Switch to dark mode';
     try{localStorage.setItem('campusnav-theme',theme);}catch(e){}
