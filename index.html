@@ -304,7 +304,7 @@ window.renderGoogleMap=function(){
   const map = L.map(mapEl).setView([31.256,75.704], 16);
   const streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
   const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles &copy; Esri'});
-  let startMarker=null, destinationMarker=null, routeLayer=null, choosingStart=false, currentPosition=null;
+  let startMarker=null, destinationMarker=null, routeLayer=null, choosingStart=false, currentPosition=null, watchingLocation=false, watchId=null;
   const setStatus = msg => statusEl.textContent=msg;
   const markerIcon = color => L.divIcon({className:'',html:'<div style="width:18px;height:18px;border:3px solid white;border-radius:50%;background:'+color+';box-shadow:0 1px 6px #333"></div>',iconSize:[18,18],iconAnchor:[9,9]});
   function setStart(latlng,label){
@@ -320,13 +320,17 @@ window.renderGoogleMap=function(){
   }
   document.getElementById('useMyLocation').addEventListener('click',()=>{
     if(!navigator.geolocation){setStatus('This browser does not support location access.');return;}
-    setStatus('Requesting your location…');
-    navigator.geolocation.getCurrentPosition(pos=>{
+    if(watchingLocation){navigator.geolocation.clearWatch(watchId);watchingLocation=false;watchId=null;setStatus('Live location paused. Your last position is retained.');return;}
+    setStatus('Requesting live location… Allow location access in your browser.');
+    watchId=navigator.geolocation.watchPosition(pos=>{
       const ll=L.latLng(pos.coords.latitude,pos.coords.longitude);
-      setStart(ll,'Your current location');
-      map.setView(ll,18);
-      setStatus('Your location is set. Search for a destination. GPS accuracy: about '+Math.round(pos.coords.accuracy)+' m.');
-    },err=>setStatus(err.code===1?'Location permission was denied. Allow location access in your browser, or choose a start point on the map.':'Could not get your location. Try again outdoors or choose a start point on the map.'),{enableHighAccuracy:true,timeout:15000,maximumAge:10000});
+      if(!startMarker){setStart(ll,'Your live location');map.setView(ll,18);}
+      else {startMarker.setLatLng(ll);currentPosition=ll;}
+      watchingLocation=true;
+      document.getElementById('useMyLocation').textContent='Pause live location';
+      startMarker.setPopupContent('Your live location<br>GPS accuracy: about '+Math.round(pos.coords.accuracy)+' m');
+      setStatus('Live location is on. Your position updates as you move. GPS accuracy: about '+Math.round(pos.coords.accuracy)+' m.');
+    },err=>{watchingLocation=false;watchId=null;setStatus(err.code===1?'Location permission was denied. Allow location access in your browser, or choose a start point on the map.':'Could not update your location. Try outdoors or choose a start point manually.');},{enableHighAccuracy:true,timeout:20000,maximumAge:3000});
   });
   document.getElementById('chooseStart').addEventListener('click',()=>{
     choosingStart=true;setStatus('Tap anywhere on the map to set your starting point.');
