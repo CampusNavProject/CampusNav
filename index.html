@@ -291,7 +291,7 @@ body[data-theme="dark"] footer{border-color:var(--line)}
     const query=input.value.trim();
     suggestionBox.innerHTML='';
     if(!query){closeSuggestions();return;}
-    const blockQuery=query.match(/^(?:block\\s*)?(\\d+[a-z]?)$/i);
+    const blockQuery=query.match(/^(?:block\s*)?(\d+[a-z]?)$/i);
     if(blockQuery){
       const wanted=blockQuery[1].toUpperCase();
       const matches=visibleBlocks.filter(b=>b.toUpperCase().startsWith(wanted));
