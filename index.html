@@ -49,6 +49,53 @@ footer{border-top:1px solid var(--line);background:#fff;padding:22px;text-align:
 #campusLeafletMap .leaflet-control-attribution{font-size:10px}
 @media(max-width:650px){#campusLeafletMap{height:430px}}
 
+
+/* Theme toggle */
+:root{--page:#f5f8fc;--surface:#fff;--surface-soft:#f8fbff;--field:#fff;--text:var(--ink)}
+body{background:var(--page);color:var(--text)}
+header,.search-panel,.campus-map-panel,.feature,#about{background:var(--surface)}
+input,select{background:var(--field);color:var(--text)}
+.theme-toggle{padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--text);font-size:13px;white-space:nowrap}
+body[data-theme="dark"]{
+ --page:#101722;--surface:#182333;--surface-soft:#202d3e;--field:#111c2a;
+ --ink:#e7edf5;--muted:#aab8c9;--white:#182333;--line:#344458;
+ --navy:#d9e7f7;--blue:#263b53;--blue2:#75aee8;--green:#263d35;--yellow:#473d25;--red:#452d32;--purple:#392f4b;
+ color:var(--ink);background:var(--page)
+}
+body[data-theme="dark"] header,
+body[data-theme="dark"] .search-panel,
+body[data-theme="dark"] .campus-map-panel,
+body[data-theme="dark"] .feature,
+body[data-theme="dark"] #about,
+body[data-theme="dark"] footer{background:var(--surface);color:var(--ink)}
+body[data-theme="dark"] .brand,
+body[data-theme="dark"] h1,
+body[data-theme="dark"] .section-head h2,
+body[data-theme="dark"] .hero-card h3,
+body[data-theme="dark"] .feature h3,
+body[data-theme="dark"] #about h2{color:var(--navy)}
+body[data-theme="dark"] .hero-card{background:#20334a;border-color:#3b536d}
+body[data-theme="dark"] .hero-card p,
+body[data-theme="dark"] .navlinks a,
+body[data-theme="dark"] label{color:var(--ink)}
+body[data-theme="dark"] input,
+body[data-theme="dark"] select{background:var(--field);color:var(--ink);border-color:var(--line)}
+body[data-theme="dark"] .secondary,
+body[data-theme="dark"] .chip,
+body[data-theme="dark"] .theme-toggle{background:var(--surface-soft);color:var(--ink);border-color:var(--line)}
+body[data-theme="dark"] .primary{background:#31577d;color:#fff}
+body[data-theme="dark"] .notice,
+body[data-theme="dark"] .map-note{background:#3c3423;border-color:#6b5930;color:#f1dfb4}
+body[data-theme="dark"] .result-top{background:#263d35;color:#e6f3e9}
+body[data-theme="dark"] .result-top p{color:#c0d6c4}
+body[data-theme="dark"] .map-box{background:#202d3e;border-color:var(--line)}
+body[data-theme="dark"] .map-sketch{background:#172231;border-color:var(--line)}
+body[data-theme="dark"] .block-directory{background:#202d3e!important;border-color:var(--line)!important}
+body[data-theme="dark"] .leaflet-map{border-color:var(--line)}
+body[data-theme="dark"] .campus-map-panel img{border-color:var(--line)}
+body[data-theme="dark"] footer{border-color:var(--line)}
+@media(max-width:850px){.nav{flex-wrap:wrap}.theme-toggle{margin-left:auto}}
+
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 </head>
@@ -56,7 +103,7 @@ footer{border-top:1px solid var(--line);background:#fff;padding:22px;text-align:
 <header>
   <div class="nav">
     <div class="brand"><div class="logo">🧭</div><div>CampusNav<br><small>Find your way with confidence</small></div></div>
-    <nav class="navlinks"><a href="#live-navigation">Find a destination</a><a href="#how-to-use">How to use</a><a href="#campus-reference">Campus map</a><a href="#features">Features</a><a href="#about">About</a></nav>
+    <nav class="navlinks"><a href="#live-navigation">Find a destination</a><a href="#how-to-use">How to use</a><a href="#campus-reference">Campus map</a><a href="#features">Features</a><a href="#about">About</a></nav>\n    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark mode">🌙 Dark mode</button>
   </div>
 </header>
 <main>
@@ -149,6 +196,24 @@ footer{border-top:1px solid var(--line);background:#fff;padding:22px;text-align:
 </main>
 <footer>CampusNav · Student wayfinding prototype · Reference map and sample routes only</footer>
 
+
+<script>
+(function(){
+  const button=document.getElementById('themeToggle');
+  if(!button)return;
+  let saved='light';
+  try{saved=localStorage.getItem('campusnav-theme')||'light';}catch(e){}
+  function applyTheme(theme){
+    document.body.setAttribute('data-theme',theme);
+    const dark=theme==='dark';
+    button.textContent=dark?'☀️ Light mode':'🌙 Dark mode';
+    button.setAttribute('aria-label',dark?'Switch to light mode':'Switch to dark mode');
+    try{localStorage.setItem('campusnav-theme',theme);}catch(e){}
+  }
+  applyTheme(saved==='dark'?'dark':'light');
+  button.addEventListener('click',()=>applyTheme(document.body.getAttribute('data-theme')==='dark'?'light':'dark'));
+})();
+</script>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
