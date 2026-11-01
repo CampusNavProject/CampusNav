@@ -80,6 +80,14 @@ footer{border-top:1px solid var(--line);background:#fff;padding:22px;text-align:
     <p id="liveStatus" class="notice" role="status">Allow location access to use your current position, or choose a starting point on the map. Search results and routes depend on OpenStreetMap coverage.</p>
     <div id="liveCampusMap" class="leaflet-map" role="region" aria-label="Campus navigation map"></div>
     <div id="liveResults" class="quick" aria-live="polite"></div>
+    <div class="block-directory" style="margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:14px;background:#f8fbff">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+        <div><strong style="color:var(--navy)">LPU block directory</strong><div style="font-size:12px;color:var(--muted);margin-top:4px">Block numbers transcribed from your three campus-map screenshots.</div></div>
+        <span class="badge">NUMBER LABELS</span>
+      </div>
+      <div id="blockDirectory" class="quick" style="margin-top:12px"></div>
+      <p style="font-size:11px;line-height:1.5;color:var(--muted);margin:12px 0 0">These are reference labels only. Their GPS pin positions still need to be aligned with the real campus map, so the directory does not pretend that unverified pins or routes are accurate.</p>
+    </div>
     <div class="map-note" style="margin-top:12px"><strong>Accuracy note:</strong> GPS can be less accurate indoors. Walking routes can only follow paths mapped in OpenStreetMap; unmapped campus paths or buildings may not appear. Confirm directions locally if the map data looks incomplete.</div>
   </section>
 
@@ -306,6 +314,20 @@ window.renderGoogleMap=function(){
   const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles &copy; Esri'});
   let startMarker=null, destinationMarker=null, routeLayer=null, choosingStart=false, currentPosition=null, watchingLocation=false, watchId=null;
   const setStatus = msg => statusEl.textContent=msg;
+  // Number labels copied from the user's supplied screenshots; no GPS coordinates inferred.
+  const visibleBlocks = ["1","2A","2B","3","4","6","8B","8C","9","10","11","12","13","14","15A","15B","18","19","20","21A","21B","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","41A","41B","41C","41D","42","45","47","48","49","50","51A","51B","53","54","55","55A","56"];
+  const blockDirectory = document.getElementById("blockDirectory");
+  visibleBlocks.forEach(block => {
+    const btn = document.createElement("button");
+    btn.type = "button"; btn.className = "chip"; btn.textContent = "Block " + block;
+    btn.addEventListener("click", () => {
+      input.value = "Block " + block;
+      setStatus("Block " + block + " selected. Its exact map pin is not calibrated yet; use the supplied block map as a reference until positions are verified.");
+      blockDirectory.querySelectorAll("button").forEach(b => b.style.outline = "");
+      btn.style.outline = "2px solid #3977b8";
+    });
+    blockDirectory.appendChild(btn);
+  });
   const markerIcon = color => L.divIcon({className:'',html:'<div style="width:18px;height:18px;border:3px solid white;border-radius:50%;background:'+color+';box-shadow:0 1px 6px #333"></div>',iconSize:[18,18],iconAnchor:[9,9]});
   function setStart(latlng,label){
     if(startMarker) map.removeLayer(startMarker);
