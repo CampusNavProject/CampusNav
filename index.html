@@ -60,6 +60,29 @@ footer{border-top:1px solid var(--line);background:#fff;padding:22px;text-align:
   </div>
 </header>
 <main>
+
+  <section class="search-panel" id="live-navigation" style="margin-top:0">
+    <div class="section-head">
+      <div><h2>Navigate anywhere on campus</h2><p>Use your GPS position or choose a starting point on the map, then search for a destination.</p></div>
+      <span class="badge">LIVE MAP · OPEN DATA</span>
+    </div>
+    <div class="form-grid" style="grid-template-columns:1fr 1fr auto">
+      <div><label for="liveDestination">Destination search</label><input id="liveDestination" type="search" placeholder="Search a place or building"></div>
+      <button class="primary" id="searchLiveDestination" type="button">Search destination</button>
+      <button class="secondary" id="useMyLocation" type="button">◎ Use my location</button>
+    </div>
+    <div class="map-actions">
+      <button class="secondary" id="chooseStart" type="button">Choose start on map</button>
+      <button class="secondary" id="satelliteView" type="button">Satellite view</button>
+      <button class="secondary" id="streetView" type="button">Street map</button>
+      <button class="secondary" id="clearLiveRoute" type="button">Clear route</button>
+    </div>
+    <p id="liveStatus" class="notice" role="status">Allow location access to use your current position, or choose a starting point on the map. Search results and routes depend on OpenStreetMap coverage.</p>
+    <div id="liveCampusMap" class="leaflet-map" role="region" aria-label="Campus navigation map"></div>
+    <div id="liveResults" class="quick" aria-live="polite"></div>
+    <div class="map-note" style="margin-top:12px"><strong>Accuracy note:</strong> GPS can be less accurate indoors. Walking routes can only follow paths mapped in OpenStreetMap; unmapped campus paths or buildings may not appear. Confirm directions locally if the map data looks incomplete.</div>
+  </section>
+
   <section class="hero">
     <div class="hero-copy">
       <span class="eyebrow">CAMPUS WAYFINDING · FRONTEND DEMO</span>
@@ -266,6 +289,97 @@ window.renderGoogleMap=function(){
     markers[0].openPopup();
   });
   setTimeout(()=>map.invalidateSize(), 250);
+})();
+</script>
+
+
+<script>
+(function(){
+  const mapEl = document.getElementById('liveCampusMap');
+  if (!mapEl || !window.L) return;
+  const statusEl = document.getElementById('liveStatus');
+  const resultsEl = document.getElementById('liveResults');
+  const input = document.getElementById('liveDestination');
+  const campusBounds = L.latLngBounds([[31.23,75.66],[31.28,75.75]]);
+  const map = L.map(mapEl).setView([31.256,75.704], 16);
+  const streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+  const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles &copy; Esri'});
+  let startMarker=null, destinationMarker=null, routeLayer=null, choosingStart=false, currentPosition=null;
+  const setStatus = msg => statusEl.textContent=msg;
+  const markerIcon = color => L.divIcon({className:'',html:'<div style="width:18px;height:18px;border:3px solid white;border-radius:50%;background:'+color+';box-shadow:0 1px 6px #333"></div>',iconSize:[18,18],iconAnchor:[9,9]});
+  function setStart(latlng,label){
+    if(startMarker) map.removeLayer(startMarker);
+    startMarker=L.marker(latlng,{draggable:true,icon:markerIcon('#16834a')}).addTo(map).bindPopup(label||'Starting point');
+    startMarker.on('dragend',()=>{currentPosition=startMarker.getLatLng();setStatus('Starting point adjusted. Search for a destination to get a walking route.');});
+    currentPosition=latlng; setStatus((label||'Starting point selected')+'. Search for a destination.');
+  }
+  function clearRoute(){
+    if(routeLayer) map.removeLayer(routeLayer);
+    if(destinationMarker) map.removeLayer(destinationMarker);
+    routeLayer=destinationMarker=null; resultsEl.innerHTML='';
+  }
+  document.getElementById('useMyLocation').addEventListener('click',()=>{
+    if(!navigator.geolocation){setStatus('This browser does not support location access.');return;}
+    setStatus('Requesting your location…');
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const ll=L.latLng(pos.coords.latitude,pos.coords.longitude);
+      setStart(ll,'Your current location');
+      map.setView(ll,18);
+      setStatus('Your location is set. Search for a destination. GPS accuracy: about '+Math.round(pos.coords.accuracy)+' m.');
+    },err=>setStatus(err.code===1?'Location permission was denied. Allow location access in your browser, or choose a start point on the map.':'Could not get your location. Try again outdoors or choose a start point on the map.'),{enableHighAccuracy:true,timeout:15000,maximumAge:10000});
+  });
+  document.getElementById('chooseStart').addEventListener('click',()=>{
+    choosingStart=true;setStatus('Tap anywhere on the map to set your starting point.');
+  });
+  map.on('click',e=>{if(choosingStart){setStart(e.latlng,'Chosen starting point');choosingStart=false;}});
+  document.getElementById('satelliteView').addEventListener('click',()=>{if(map.hasLayer(streets))map.removeLayer(streets);if(!map.hasLayer(satellite))satellite.addTo(map);});
+  document.getElementById('streetView').addEventListener('click',()=>{if(map.hasLayer(satellite))map.removeLayer(satellite);if(!map.hasLayer(streets))streets.addTo(map);});
+  document.getElementById('clearLiveRoute').addEventListener('click',()=>{clearRoute();setStatus('Route cleared. Your starting point is retained.');});
+  async function searchDestination(){
+    const q=input.value.trim(); if(!q){setStatus('Enter a destination to search.');return;}
+    setStatus('Searching OpenStreetMap for “'+q+'”…'); resultsEl.innerHTML='';
+    try{
+      const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&bounded=1&viewbox=75.66,31.28,75.75,31.23&q='+encodeURIComponent(q+' LPU Phagwara');
+      const response=await fetch(url,{headers:{'Accept':'application/json'}});
+      if(!response.ok) throw new Error('Search service unavailable');
+      const places=await response.json();
+      if(!places.length){setStatus('No mapped match found. Try a more specific name, or choose a point manually on the map.');return;}
+      places.forEach((place,i)=>{
+        const btn=document.createElement('button');btn.type='button';btn.className='chip';btn.textContent=place.display_name.split(',').slice(0,3).join(',');
+        btn.addEventListener('click',()=>routeTo(place));resultsEl.appendChild(btn);
+      });
+      setStatus('Choose a search result to preview a mapped walking route.');
+    }catch(e){setStatus('Destination search is temporarily unavailable. Check your connection and try again.');}
+  }
+  async function routeTo(place){
+    if(!currentPosition){setStatus('Set your starting point first using GPS or “Choose start on map”.');return;}
+    const end=L.latLng(Number(place.lat),Number(place.lon));
+    clearRoute();
+    destinationMarker=L.marker(end,{icon:markerIcon('#c23b3b')}).addTo(map).bindPopup(place.display_name);
+    setStatus('Looking for a mapped walking route…');
+    try{
+      const a=currentPosition;
+      const url='https://routing.openstreetmap.de/routed-foot/route/v1/driving/'+a.lng+','+a.lat+';'+end.lng+','+end.lat+'?overview=full&geometries=geojson&steps=true';
+      const response=await fetch(url);
+      if(!response.ok) throw new Error('No route');
+      const data=await response.json();
+      if(data.code!=='Ok'||!data.routes?.length) throw new Error('No route');
+      const route=data.routes[0];
+      routeLayer=L.geoJSON(route.geometry,{style:{color:'#2563eb',weight:6,opacity:.85}}).addTo(map);
+      map.fitBounds(routeLayer.getBounds().pad(.18));
+      const mins=Math.max(1,Math.round(route.duration/60)), metres=Math.round(route.distance);
+      setStatus('Walking route found from your selected start. Approx. '+(metres>=1000?(metres/1000).toFixed(1)+' km':metres+' m')+' · '+mins+' min. Estimates depend on mapped paths.');
+      const steps=(route.legs||[]).flatMap(leg=>leg.steps||[]).slice(0,8);
+      if(steps.length){
+        const ol=document.createElement('ol');ol.style.cssText='margin:8px 0;padding-left:22px;color:#34465c;font-size:13px;line-height:1.6';
+        steps.forEach(s=>{const li=document.createElement('li');li.textContent=(s.name?s.name+' — ':'')+(s.maneuver?.type||'Continue');ol.appendChild(li);});
+        resultsEl.appendChild(ol);
+      }
+    }catch(e){setStatus('No walking route is available for this pair of points in the mapped data. Try another destination or verify the path locally.');}
+  }
+  document.getElementById('searchLiveDestination').addEventListener('click',searchDestination);
+  input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchDestination();}});
+  setTimeout(()=>map.invalidateSize(),300);
 })();
 </script>
 
