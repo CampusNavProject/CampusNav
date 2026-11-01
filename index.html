@@ -61,10 +61,10 @@ footer{border-top:1px solid var(--line);background:#fff;padding:22px;text-align:
 </header>
 <main>
 
-  <section class="campus-map-panel" id="how-to-use">
+  <section class="campus-map-panel" id="how-to-use" style="padding:0;overflow:hidden">\n    <details>\n      <summary style="cursor:pointer;list-style:none;padding:20px 22px;font-size:20px;font-weight:800;color:var(--navy);display:flex;align-items:center;justify-content:space-between;gap:12px">How to use CampusNav <span class="badge">VIEW STEPS</span></summary>\n      <div style="padding:0 22px 22px">
     <div class="section-head">
       <div>
-        <h2>How to use CampusNav</h2>
+        <h2 style="display:none">How to use CampusNav</h2>
         <p>Follow these steps to choose a starting point, find a campus destination and view your route.</p>
       </div>
       <span class="badge">QUICK GUIDE</span>
@@ -73,13 +73,13 @@ footer{border-top:1px solid var(--line);background:#fff;padding:22px;text-align:
       <li><strong>Open the live navigation map.</strong> Scroll to “Navigate anywhere on campus” and allow the browser to access your location if you want to start from where you are. Tap “Use my location” and wait for the location status to update. GPS may be less accurate indoors.</li>
       <li><strong>Or choose your starting point manually.</strong> Tap “Choose start on map”, then tap your starting location on the map. You can drag the green start marker to adjust it.</li>
       <li><strong>Find your destination.</strong> Type a place or building name in “Destination search” and tap “Search destination”. Choose the matching result that appears below the map.</li>
-      <li><strong>To find a numbered block, use the block directory.</strong> Tap the required “Block” button. CampusNav will ask you to tap that building’s actual position on the live map to set the destination. Use the Campus Reference Map below to identify the correct building first.</li>
+      <li><strong>Identify and mark your block using the reference map.</strong> Open the LPU Campus Reference Map and find the block number you want to visit. Remember that number, then return to the live map and tap the matching “Block” button in the block directory. CampusNav will ask you to tap the building’s actual position on the live map to set the destination.</li>
       <li><strong>View the route.</strong> Once a starting point and destination are set, CampusNav displays an available route on the live map and an approximate distance and travel time. Follow the mapped path and use nearby landmarks to orient yourself.</li>
       <li><strong>Change the map view if needed.</strong> Tap “Satellite view” to see satellite imagery or “Street map” to return to the standard map. Use the map’s + and − controls to zoom in and out.</li>
       <li><strong>Start again for another destination.</strong> Tap “Clear route” to remove the current route and destination, then search for another place. Your selected starting point is retained unless you choose a new one.</li>
     </ol>
     <div class="map-note" style="margin-top:16px"><strong>Important:</strong> CampusNav depends on browser location permission, internet access and OpenStreetMap search and walking-path coverage. Some campus buildings or paths may not be mapped. The numbered reference map is for identification only; block positions are not GPS-calibrated, so verify the building and route on campus.</div>
-  </section>
+      </div>\n    </details>\n  </section>
 
 
   <section class="search-panel" id="live-navigation" style="margin-top:0">
