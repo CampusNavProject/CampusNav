@@ -56,7 +56,7 @@ footer{border-top:1px solid var(--line);background:#fff;padding:22px;text-align:
 <header>
   <div class="nav">
     <div class="brand"><div class="logo">🧭</div><div>CampusNav<br><small>Find your way with confidence</small></div></div>
-    <nav class="navlinks"><a href="#find">Find a destination</a><a href="#features">Features</a><a href="#about">About</a></nav>
+    <nav class="navlinks"><a href="#live-navigation">Find a destination</a><a href="#features">Features</a><a href="#about">About</a></nav>
   </div>
 </header>
 <main>
@@ -91,44 +91,6 @@ footer{border-top:1px solid var(--line);background:#fff;padding:22px;text-align:
     <div class="map-note" style="margin-top:12px"><strong>Accuracy note:</strong> GPS can be less accurate indoors. Walking routes can only follow paths mapped in OpenStreetMap; unmapped campus paths or buildings may not appear. Confirm directions locally if the map data looks incomplete.</div>
   </section>
 
-  <section class="hero">
-    <div class="hero-copy">
-      <span class="eyebrow">CAMPUS WAYFINDING · FRONTEND DEMO</span>
-      <h1>Every block.<br>One clear route.</h1>
-      <p>Find your destination with simple directions, familiar landmarks, and a route that starts at your gate.</p>
-      <a href="#find"><button class="primary">Find a block&nbsp; →</button></a>
-    </div>
-    <div class="hero-card">
-      <div><h3>Your campus, made easier.</h3><p>Search a block, choose your starting gate, and follow the steps.</p></div>
-      <div class="mini-map">
-        <div class="road one"></div><div class="road two"></div><div class="road three"></div>
-        <div class="pin a">🚪 Main Gate</div><div class="pin c">📍 Main Junction</div><div class="pin b">🏢 Block 34</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="search-panel" id="find">
-    <div class="section-head"><div><h2>Where do you need to go?</h2><p>Choose a gate and destination to preview a route.</p></div><span class="badge">DEMO ROUTES</span></div>
-    <form id="routeForm">
-      <div class="form-grid">
-        <div><label for="gate">Starting gate</label><select id="gate" required><option value="Main Gate">Main Gate</option><option value="North Gate">North Gate</option><option value="South Gate">South Gate</option></select></div>
-        <div><label for="destination">Destination</label><select id="destination" required><option value="Block 34">Block 34</option><option value="Library">Library</option><option value="Admissions Office">Admissions Office</option><option value="Examination Centre">Examination Centre</option><option value="Student Services">Student Services</option></select></div>
-        <div><label for="search">Or search by name</label><input id="search" type="text" placeholder="e.g. Library or Block 34"></div>
-        <button class="primary" type="submit">Show route</button>
-      </div>
-    </form>
-    <div class="quick"><span>Popular destinations:</span><button type="button" class="chip" data-dest="Block 34">Block 34</button><button type="button" class="chip" data-dest="Library">Library</button><button type="button" class="chip" data-dest="Admissions Office">Admissions Office</button><button type="button" class="chip" data-dest="Examination Centre">Examination Centre</button></div>
-    <div id="toast" class="toast" role="alert"></div>
-    <div class="results" id="results" aria-live="polite">
-      <div class="result-top"><div><h3 id="routeTitle">Route to Block 34</h3><p id="routeSummary">Starting at Main Gate · Demo directions</p></div><button type="button" class="secondary" id="reset">Clear route</button></div>
-      <div class="route-body">
-        <div><h4 style="margin-top:0">Follow these steps</h4><ol class="route-steps" id="steps"></ol></div>
-        <div class="map-box"><h4>Route preview</h4><div class="map-sketch"><div class="map-road r1"></div><div class="map-road r2"></div><div class="map-road r3"></div><span class="map-label l1" id="mapStart">START · MAIN GATE</span><span class="map-label l3">JUNCTION</span><span class="map-label l2" id="mapEnd">BLOCK 34</span></div></div>
-      </div>
-    </div>
-    <div class="notice"><strong>Prototype notice:</strong> This is a frontend-only mock-up. Destination names, route steps, and the map illustration are sample content—not official campus directions. No backend, live map, GPS, or database is connected.</div>
-  </section>
-
   <section class="features" id="features">
     <article class="feature"><div class="ico">🔎</div><h3>Search destinations</h3><p>Look up blocks and common places with a simple destination selector.</p></article>
     <article class="feature"><div class="ico">🪧</div><h3>Step-by-step guidance</h3><p>See clear route instructions and landmarks in an easy-to-follow list.</p></article>
@@ -140,111 +102,7 @@ footer{border-top:1px solid var(--line);background:#fff;padding:22px;text-align:
   </section>
 </main>
 <footer>CampusNav · Student wayfinding prototype · Reference map and sample routes only</footer>
-<script>
-const routes = {
-  "Block 34": [
-    ["Start at your selected gate","Look for the campus information sign and confirm your starting point."],
-    ["Head towards the main junction","Follow the directional arrows shown in this demo."],
-    ["Check the block signs","Look for the sign labelled Block 34 at the next route point."],
-    ["Confirm your destination","Check the building label before entering."]
-  ],
-  "Library": [
-    ["Start at your selected gate","Follow the main pedestrian route towards the central campus area."],
-    ["Look for the central information point","Use the campus sign to confirm the next direction."],
-    ["Follow the Library sign","Continue to the destination marker and confirm the building label."]
-  ],
-  "Admissions Office": [
-    ["Start at your selected gate","Follow the visitor direction signs towards campus services."],
-    ["Find the student-services junction","Check the information board for the admissions direction."],
-    ["Confirm the office entrance","Look for the Admissions Office label before entering."]
-  ],
-  "Examination Centre": [
-    ["Start at your selected gate","Check event-day or examination signs at the entry point."],
-    ["Follow the examination direction","Use the next campus information board to confirm the route."],
-    ["Confirm the examination centre","Check the venue name and any room or hall information provided."]
-  ],
-  "Student Services": [
-    ["Start at your selected gate","Follow the signs towards student support and service facilities."],
-    ["Check the campus information point","Confirm the correct building or service area."],
-    ["Look for Student Services","Verify the label at the entrance."]
-  ]
-};
-const form = document.getElementById("routeForm");
-const destination = document.getElementById("destination");
-const search = document.getElementById("search");
-const gate = document.getElementById("gate");
-const results = document.getElementById("results");
-const toast = document.getElementById("toast");
-function showRoute(dest){
-  const start = gate.value;
-  document.getElementById("routeTitle").textContent = "Route to " + dest;
-  document.getElementById("routeSummary").textContent = "Starting at " + start + " · Sample directions";
-  document.getElementById("mapStart").textContent = "START · " + start.toUpperCase();
-  document.getElementById("mapEnd").textContent = dest.toUpperCase();
-  const list = document.getElementById("steps"); list.innerHTML = "";
-  (routes[dest] || routes["Block 34"]).forEach((step,i)=>{
-    const li=document.createElement("li");
-    li.innerHTML = `<span class="num">${i+1}</span><div><strong>${step[0]}</strong><p>${step[1]}</p></div>`;
-    list.appendChild(li);
-  });
-  toast.style.display="none"; results.style.display="block";
-  results.scrollIntoView({behavior:"smooth",block:"nearest"});
-}
-form.addEventListener("submit",e=>{
-  e.preventDefault();
-  const typed=search.value.trim().toLowerCase();
-  let dest=destination.value;
-  if(typed){
-    const all=Object.keys(routes);
-    const match=all.find(x=>x.toLowerCase()===typed) || all.find(x=>x.toLowerCase().includes(typed) || typed.includes(x.toLowerCase()));
-    if(!match){toast.textContent="This demo only includes sample destinations. Try Block 34, Library, Admissions Office, Examination Centre, or Student Services.";toast.style.display="block";results.style.display="none";return;}
-    dest=match; destination.value=match;
-  }
-  showRoute(dest);
-});
-document.querySelectorAll("[data-dest]").forEach(btn=>btn.addEventListener("click",()=>{
-  destination.value=btn.dataset.dest;search.value="";showRoute(btn.dataset.dest);
-}));
-document.getElementById("reset").addEventListener("click",()=>{results.style.display="none";search.value="";});
 
-const OSM_URL = "https://www.openstreetmap.org/?mlat=31.256&mlon=75.704#map=16/31.256/75.704";
-document.getElementById("openOsm")?.addEventListener("click",()=>window.open(OSM_URL,"_blank","noopener"));
-document.getElementById("resetMap")?.addEventListener("click",()=>{
-  const frame=document.querySelector("#mapFallback iframe");
-  if(frame) frame.src="https://www.openstreetmap.org/export/embed.html?bbox=75.690%2C31.246%2C75.719%2C31.266&layer=mapnik&marker=31.256%2C75.704";
-  document.getElementById("mapFallback").style.display="block";
-  document.getElementById("googleMapWrap").style.display="none";
-  document.getElementById("googleSetup").style.display="none";
-});
-document.getElementById("showGoogle")?.addEventListener("click",()=>{
-  document.getElementById("googleSetup").style.display="block";
-  const key = "YOUR_GOOGLE_MAPS_API_KEY";
-  if (key === "YOUR_GOOGLE_MAPS_API_KEY") {
-    document.getElementById("googleSetup").scrollIntoView({behavior:"smooth",block:"nearest"});
-    return;
-  }
-  loadGoogleMap(key);
-});
-function loadGoogleMap(key){
-  document.getElementById("mapFallback").style.display="none";
-  document.getElementById("googleMapWrap").style.display="block";
-  if(window.google && window.google.maps){ renderGoogleMap(); return; }
-  const script=document.createElement("script");
-  script.src="https://maps.googleapis.com/maps/api/js?key="+encodeURIComponent(key)+"&callback=renderGoogleMap&v=weekly";
-  script.async=true; script.defer=true;
-  script.onerror=()=>{document.getElementById("googleSetup").style.display="block";};
-  document.head.appendChild(script);
-}
-window.renderGoogleMap=function(){
-  const center={lat:31.256,lng:75.704};
-  const map=new google.maps.Map(document.getElementById("googleMap"),{
-    center,zoom:16,mapTypeId:"hybrid",tilt:45,heading:0,
-    mapTypeControl:true,streetViewControl:true,fullscreenControl:true
-  });
-  new google.maps.Marker({position:center,map,title:"LPU campus area (approximate)"});
-};
-
-</script>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
