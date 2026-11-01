@@ -238,12 +238,6 @@ footer{border-top:1px solid var(--line);background:#fff;padding:22px;text-align:
       map.fitBounds(routeLayer.getBounds().pad(.18));
       const mins=Math.max(1,Math.round(route.duration/60)), metres=Math.round(route.distance);
       setStatus('Walking route found from your selected start. Approx. '+(metres>=1000?(metres/1000).toFixed(1)+' km':metres+' m')+' · '+mins+' min. Estimates depend on mapped paths.');
-      const steps=(route.legs||[]).flatMap(leg=>leg.steps||[]).slice(0,8);
-      if(steps.length){
-        const ol=document.createElement('ol');ol.style.cssText='margin:8px 0;padding-left:22px;color:#34465c;font-size:13px;line-height:1.6';
-        steps.forEach(s=>{const li=document.createElement('li');li.textContent=(s.name?s.name+' — ':'')+(s.maneuver?.type||'Continue');ol.appendChild(li);});
-        resultsEl.appendChild(ol);
-      }
     }catch(e){setStatus('No walking route is available for this pair of points in the mapped data. Try another destination or verify the path locally.');}
   }
   document.getElementById('searchLiveDestination').addEventListener('click',searchDestination);
