@@ -56,7 +56,7 @@ footer{border-top:1px solid var(--line);background:#fff;padding:22px;text-align:
 <header>
   <div class="nav">
     <div class="brand"><div class="logo">🧭</div><div>CampusNav<br><small>Find your way with confidence</small></div></div>
-    <nav class="navlinks"><a href="#find">Find a destination</a><a href="#campus-map">Campus map</a><a href="#features">Features</a><a href="#about">About</a></nav>
+    <nav class="navlinks"><a href="#find">Find a destination</a><a href="#features">Features</a><a href="#about">About</a></nav>
   </div>
 </header>
 <main>
@@ -127,21 +127,6 @@ footer{border-top:1px solid var(--line);background:#fff;padding:22px;text-align:
       </div>
     </div>
     <div class="notice"><strong>Prototype notice:</strong> This is a frontend-only mock-up. Destination names, route steps, and the map illustration are sample content—not official campus directions. No backend, live map, GPS, or database is connected.</div>
-  </section>
-
-  <section class="campus-map-panel" id="campus-map">
-    <div class="section-head">
-      <div><h2>Campus Map Demo</h2><p>Try the sample markers and example route. This is a demonstration, not official LPU navigation.</p></div>
-      <span class="badge">DEMO MODE</span>
-    </div>
-    <div class="map-actions" style="display:flex;gap:10px;flex-wrap:wrap;margin:14px 0">
-      <button class="primary" type="button" id="zoomCampus">Show demo area</button>
-      <button class="secondary" type="button" id="showDemoRoute">Show example route</button>
-      <button class="secondary" type="button" id="resetCampusMap">Reset demo</button>
-    </div>
-    <div id="campusLeafletMap" class="leaflet-map" role="region" aria-label="Interactive map near Lovely Professional University"></div>
-    <div class="map-note" style="margin-top:14px"><strong>How to use:</strong> zoom with +/−, drag to pan, click sample markers, and select “Show example route” to see a demonstration path.</div>
-    <div class="map-note" style="margin-top:8px"><strong>Demo note:</strong> Marker positions and the example route are illustrative sample data, not verified LPU building locations or walking directions. The OpenStreetMap background needs an internet connection.</div>
   </section>
 
   <section class="features" id="features">
@@ -262,43 +247,7 @@ window.renderGoogleMap=function(){
 </script>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script>
-(function(){
-  // Approximate campus-area center; sample marker positions below are for demo UI only.
-  const center = [31.256, 75.704];
-  const mapEl = document.getElementById("campusLeafletMap");
-  if (!mapEl || !window.L) return;
-  const map = L.map(mapEl, { scrollWheelZoom: true }).setView(center, 16);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>'
-  }).addTo(map);
 
-  const demoPlaces = [
-    {name:"Starting Gate (Demo)", coords:[31.2549,75.7017], note:"Sample starting point"},
-    {name:"Block 34 (Demo)", coords:[31.2570,75.7062], note:"Sample destination — position is illustrative"},
-    {name:"Library (Demo)", coords:[31.2580,75.7034], note:"Sample destination — position is illustrative"}
-  ];
-  const markers = demoPlaces.map(place => L.marker(place.coords).addTo(map)
-    .bindPopup("<strong>"+place.name+"</strong><br>"+place.note));
-  const demoRoute = L.polyline([demoPlaces[0].coords, [31.2556,75.7030], [31.2564,75.7045], demoPlaces[1].coords], {
-    color:"#2563eb", weight:5, opacity:0.85, dashArray:"8 8"
-  });
-  markers[0].openPopup();
-
-  document.getElementById("zoomCampus")?.addEventListener("click", ()=>map.fitBounds(L.featureGroup(markers).getBounds().pad(0.25), {animate:true}));
-  document.getElementById("showDemoRoute")?.addEventListener("click", ()=>{
-    demoRoute.addTo(map);
-    map.fitBounds(demoRoute.getBounds().pad(0.3), {animate:true});
-  });
-  document.getElementById("resetCampusMap")?.addEventListener("click", ()=>{
-    map.removeLayer(demoRoute);
-    map.setView(center, 16, {animate:true});
-    markers[0].openPopup();
-  });
-  setTimeout(()=>map.invalidateSize(), 250);
-})();
-</script>
 
 
 <script>
