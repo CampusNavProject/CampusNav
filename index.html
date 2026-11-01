@@ -374,7 +374,7 @@ window.renderGoogleMap=function(){
   document.getElementById('clearLiveRoute').addEventListener('click',()=>{clearRoute();setStatus('Route cleared. Your starting point is retained.');});
   async function searchDestination(){
     const q=input.value.trim(); if(!q){setStatus('Enter a destination to search.');return;}
-    const blockMatch=q.match(/^block\s*(\d+[a-z]?)$/i);
+    const blockMatch=q.match(/^(?:block\s*)?(\d+[a-z]?)$/i);
     if(blockMatch){
       selectedBlock=blockMatch[1].toUpperCase();
       choosingDestination=true;
