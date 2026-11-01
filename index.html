@@ -27,6 +27,14 @@ h1{font-size:clamp(34px,4vw,52px);line-height:1.08;margin:18px 0 14px;color:var(
 label{display:block;font-size:12px;font-weight:800;color:#4b5c70;margin:0 0 7px}
 input,select{width:100%;padding:13px 12px;border:1px solid #cbd5e1;border-radius:11px;background:white;color:var(--ink);font:inherit;outline:none}
 input:focus,select:focus{border-color:var(--blue2);box-shadow:0 0 0 3px #3977b81c}
+.destination-autocomplete{position:relative;min-width:0}
+.suggestion-list{position:absolute;top:100%;left:0;right:0;z-index:20;margin-top:5px;max-height:280px;overflow-y:auto;background:var(--surface,#fff);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 28px #15263b26}
+.suggestion-list[hidden]{display:none}
+.suggestion-option{display:block;width:100%;padding:11px 13px;border:0;border-radius:0;background:transparent;color:var(--ink);text-align:left;font-size:13px;font-weight:500;line-height:1.4}
+.suggestion-option+ .suggestion-option{border-top:1px solid var(--line)}
+.suggestion-option:hover,.suggestion-option:focus{background:var(--blue);outline:none}
+.suggestion-meta{display:block;margin-top:3px;color:var(--muted);font-size:11px}
+
 button{border:0;border-radius:11px;padding:14px 18px;font:inherit;font-weight:800;cursor:pointer;transition:.15s}
 .primary{background:var(--navy);color:white}.primary:hover{background:#314e70}.secondary{background:var(--blue);color:var(--navy);border:1px solid #c6d9ed}
 .quick{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}.quick span{font-size:12px;color:var(--muted);margin-right:4px}.chip{padding:8px 11px;background:#f4f7fb;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--ink)}
@@ -140,7 +148,7 @@ body[data-theme="dark"] footer{border-color:var(--line)}
       <span class="badge">LIVE MAP · OPEN DATA</span>
     </div>
     <div class="form-grid" style="grid-template-columns:1fr 1fr auto">
-      <div><label for="liveDestination">Destination search</label><input id="liveDestination" type="search" placeholder="Search a place or building"></div>
+      <div class="destination-autocomplete"><label for="liveDestination">Destination search</label><input id="liveDestination" type="search" placeholder="Start typing a place or block..." autocomplete="off" aria-autocomplete="list" aria-controls="destinationSuggestions" aria-expanded="false"><div id="destinationSuggestions" class="suggestion-list" role="listbox" hidden></div></div>
       <button class="primary" id="searchLiveDestination" type="button">Search destination</button>
       <button class="secondary" id="useMyLocation" type="button">◎ Use my location</button>
     </div>
@@ -250,7 +258,85 @@ body[data-theme="dark"] footer{border-color:var(--line)}
     });
     blockDirectory.appendChild(btn);
   });
-  const markerIcon = color => L.divIcon({className:'',html:'<div style="width:18px;height:18px;border:3px solid white;border-radius:50%;background:'+color+';box-shadow:0 1px 6px #333"></div>',iconSize:[18,18],iconAnchor:[9,9]});
+  const suggestionBox = document.getElementById('destinationSuggestions');
+  let suggestionTimer = null;
+  let suggestionRequest = null;
+  function closeSuggestions(){
+    suggestionBox.hidden = true;
+    suggestionBox.innerHTML = '';
+    input.setAttribute('aria-expanded','false');
+  }
+  function addSuggestion(title, subtitle, choose){
+    const option=document.createElement('button');
+    option.type='button';
+    option.className='suggestion-option';
+    option.setAttribute('role','option');
+    option.textContent=title;
+    if(subtitle){
+      const meta=document.createElement('span');
+      meta.className='suggestion-meta';
+      meta.textContent=subtitle;
+      option.appendChild(meta);
+    }
+    option.addEventListener('click',()=>{
+      input.value=title;
+      closeSuggestions();
+      choose();
+    });
+    suggestionBox.appendChild(option);
+  }
+  input.addEventListener('input',()=>{
+    clearTimeout(suggestionTimer);
+    if(suggestionRequest) suggestionRequest.abort();
+    const query=input.value.trim();
+    suggestionBox.innerHTML='';
+    if(!query){closeSuggestions();return;}
+    const blockQuery=query.match(/^(?:block\\s*)?(\\d+[a-z]?)$/i);
+    if(blockQuery){
+      const wanted=blockQuery[1].toUpperCase();
+      const matches=visibleBlocks.filter(b=>b.toUpperCase().startsWith(wanted));
+      matches.slice(0,8).forEach(block=>{
+        addSuggestion('Block '+block,'Numbered campus building',()=>{
+          selectedBlock=block;
+          choosingDestination=true;
+          setStatus('Block '+block+' selected. Use the reference map to confirm the building, then tap its position on the live map.');
+          map.getContainer().scrollIntoView({behavior:'smooth',block:'center'});
+        });
+      });
+      if(matches.length){suggestionBox.hidden=false;input.setAttribute('aria-expanded','true');}
+      return;
+    }
+    if(query.length<3){closeSuggestions();return;}
+    suggestionTimer=setTimeout(async()=>{
+      try{
+        suggestionRequest=new AbortController();
+        const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&bounded=1&viewbox=75.66,31.28,75.75,31.23&q='+encodeURIComponent(query+' LPU Phagwara');
+        const response=await fetch(url,{headers:{'Accept':'application/json'},signal:suggestionRequest.signal});
+        if(!response.ok) throw new Error('Search unavailable');
+        const places=await response.json();
+        if(input.value.trim()!==query)return;
+        suggestionBox.innerHTML='';
+        places.forEach(place=>{
+          const parts=place.display_name.split(',');
+          addSuggestion(parts.slice(0,3).join(','),parts.slice(3,6).join(',').trim(),()=>routeTo(place));
+        });
+        if(!places.length){
+          const empty=document.createElement('div');
+          empty.className='suggestion-option';
+          empty.textContent='No matching places found. Try another name.';
+          suggestionBox.appendChild(empty);
+        }
+        suggestionBox.hidden=false;
+        input.setAttribute('aria-expanded','true');
+      }catch(error){
+        if(error.name!=='AbortError') closeSuggestions();
+      }
+    },700);
+  });
+  document.addEventListener('click',event=>{
+    if(!event.target.closest('.destination-autocomplete')) closeSuggestions();
+  });
+\n    const markerIcon = color => L.divIcon({className:'',html:'<div style="width:18px;height:18px;border:3px solid white;border-radius:50%;background:'+color+';box-shadow:0 1px 6px #333"></div>',iconSize:[18,18],iconAnchor:[9,9]});
   function setStart(latlng,label){
     if(startMarker) map.removeLayer(startMarker);
     startMarker=L.marker(latlng,{draggable:true,icon:markerIcon('#16834a')}).addTo(map).bindPopup(label||'Starting point');
